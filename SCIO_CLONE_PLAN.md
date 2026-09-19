@@ -1,18 +1,20 @@
 # SCIO clone: MVP delivery plan
 
-**Decision document — trial exploration in progress.** This is a plan for a working digital-signage product, not a pixel-for-pixel copy of every SCIO page. The Screens and Files/Assets observations below come from our trial account; playlist and schedule workflows will be checked before submission.
+**Decision document — trial exploration in progress.** This is a plan for a working digital-signage product, not a pixel-for-pixel copy of every SCIO page. The Screens, Files/Assets, and Playlist observations below come from our trial account; the schedule and publish flows will be checked before submission.
 
 ## 1. Product understanding and the first customer journey
 
-The core job is to let an operator manage what many screens show, when they show it, and whether the screens are healthy. The first journey I would ship is: create an account and location → pair a player to a screen → upload an image or video → make a playlist → assign it to the screen → see playback and device status. A second journey adds a recurring schedule and fallback content.
+The core job is to let an operator manage what many screens show, when they show it, and whether the screens are healthy. The first journey I would ship is: create an account and location → pair a player to a screen → preview a starter playlist → push it to the screen → see playback and device status. The next journey lets the operator upload an image or video and customize that playlist; a third adds a recurring schedule and fallback content.
 
 In the trial account's [Screens onboarding view](evidence/product/dashboard.png), the first task is to prepare a device and obtain a six-digit pairing code. The page offers desktop players for people without signage hardware, followed by “Pair Screen & Assign Content,” “Create Content,” and an optional playlist. That is a useful signal that the product's first success moment is a working screen, not a completed content library.
 
 The trial [Files/Assets Home](evidence/product/assets.png) shows nine content cards, including templates, ESPN News, and Houston Weather. Upload Files, Create, New Folder, Apps, Templates, and Feeds are separate entry points; the library also offers Images, Videos, Docs, and Apps filters, Favorites, and Shared with me. The Get Started panel remains visible here, connecting content work back to screen pairing. I would give a new account a few usable starter examples and keep content type and source explicit in the data model. The MVP can ship uploaded images/videos and static starter templates; live app and feed integrations follow later.
 
+The trial [Simple Playlist editor](evidence/product/playlists.png) already contains nine mixed content items with item durations from 10 to 60 seconds and a total of 6 minutes 10 seconds. The asset browser is open beside the ordered list, with a drag/browse drop zone and a direct **Push to Screens** action. This makes a starter playlist, duration controls, preview, and a short path to publication part of the first-use flow. I would seed a playlist from the static examples rather than require the operator to assemble one before seeing content on a screen.
+
 This sequence follows the product's own [screen setup guide](https://support.optisigns.com/hc/en-us/articles/360016374813-Set-up-add-a-screen), [playlist guide](https://support.optisigns.com/hc/en-us/articles/28295104605843-How-to-Create-Use-Playlists), and [schedule guide](https://support.optisigns.com/hc/en-us/articles/360016981853-Creating-and-Using-Schedules-with-OptiSigns). In particular, the schedule guide documents screen-local time zones, overlap precedence, and default content when no event is active. Those are playback rules, not merely calendar UI details.
 
-**Trial-account evidence still to add:** screenshots or notes from Playlists and Schedule, including one attempt to publish content to a screen or preview player. This will distinguish observed behavior from help-article descriptions.
+**Trial-account evidence still to add:** screenshots or notes from Schedule and one attempt to use Push to Screens or a preview player. This will distinguish observed behavior from help-article descriptions.
 
 ## 2. Scope decision
 
@@ -23,9 +25,9 @@ This sequence follows the product's own [screen setup guide](https://support.opt
 | Account, owner/editor/viewer roles, locations | Operators need a safe boundary for multi-location work. |
 | Pairing code, screen inventory, tags, heartbeat and last-seen time | Without a paired and observable player, content management cannot be verified. |
 | Image/video upload, metadata, folders, replace asset, static starter examples | These are the smallest useful content primitives. Starter examples make the first-use library useful; replacing an asset should update screens using it. |
-| Ordered playlists, per-item duration, one simple two-zone layout | Provides both rotation and basic layout control without a full designer. |
+| Ordered playlists, per-item duration, starter playlist, preview, one simple two-zone layout | The trial's sample playlist shortens time to first playback; this still avoids a full designer. |
 | One-time and weekly content schedules, screen-local time zone, conflict policy, fallback content | Covers normal dayparting and makes empty or overlapping periods deterministic. |
-| Publish/preview, versioned player manifest, local cache and offline continuation | Operators must know what will play; screens must keep playing during temporary disconnection. |
+| Direct Push to Screens, versioned player manifest, local cache and offline continuation | Operators need a short path from playlist to playback; screens must keep playing during temporary disconnection. |
 
 **After MVP:** monthly/custom recurrence; nested playlists; social and third-party app integrations; template designer; billing; SSO; advanced analytics; remote power/volume/brightness; HDMI-CEC and RS-232; native players for multiple OS families. These have materially different implementation or support costs. The [operational schedule guide](https://support.optisigns.com/hc/en-us/articles/28598173096723-How-To-Create-and-Use-Operational-Schedules-HDMI-CEC-RS-232) describes hardware and plan-specific behavior, so it should be a separate workstream rather than a checkbox in the content scheduler.
 
@@ -54,7 +56,7 @@ Assume **four engineers** (two full-stack, one player-focused, one backend/media
 | --- | --- | --- |
 | 1–2 | Trial research, clickable flow, domain model, player/API contract, test devices | The player contract and scheduling rules are expensive to change later. |
 | 3–4 | Auth, tenant boundary, location and screen records, expiring pairing flow | Establishes the identity of each screen before publishing content. |
-| 5–7 | Asset upload/processing, playlist editing, basic layout preview | Gives operators something real to assign and exposes codec problems early. |
+| 5–7 | Asset upload/processing, playlist editing, starter examples, basic layout preview | Gives operators content to assign immediately and exposes codec problems early. |
 | 7–9 | Publish and assignment, manifest versions, online player playback, heartbeat | First end-to-end vertical slice: upload → publish → visible screen. |
 | 9–11 | Weekly/one-time schedules, time zones, overlap warnings, fallback | Builds on the working player and makes scheduling behavior testable. |
 | 11–13 | Offline cache, retry/reconnect, role checks, bulk screen assignment | Reliability and multi-location operations before broad rollout. |
@@ -76,7 +78,7 @@ Main risks: codec differences across hardware, intermittent networks, schedule t
 
 ## 6. Unexpected product finding and plan change
 
-I expected the first-run portal to lead with a media library or layout editor. Instead, the [trial account's first Screens view](evidence/product/dashboard.png) leads with device preparation, a six-digit pairing code, and a desktop path for users without a device; creating a playlist is explicitly optional in its checklist. This changed my sequence: the first engineering milestone is a pairable player and a visible screen, and the portal is built around the first publish-to-screen journey. The player spike starts in week 1, before a rich asset or playlist editor. It also supports choosing a browser/kiosk player as the first target, because the product gives new users a desktop way to try the journey.
+I expected the first-run portal to lead with a media library or layout editor. Instead, the [trial account's first Screens view](evidence/product/dashboard.png) leads with device preparation and a six-digit pairing code, while [Playlists](evidence/product/playlists.png) already has a nine-item Simple Playlist with **Push to Screens**. A customer can reach first playback without creating media. This changed my sequence: the first engineering milestone is a pairable player that can publish a seeded playlist, before a rich uploader or playlist editor. The player spike starts in week 1 and uses sample media; the browser/kiosk player is the first target because the product gives new users a desktop path to try the journey.
 
 ## 7. How I would spend the planning exercise's eight hours
 
