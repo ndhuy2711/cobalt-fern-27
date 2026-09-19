@@ -21,7 +21,7 @@ For the real vector store, copy `.env.sample` to `.env`, set `OPENAI_API_KEY`, t
 
 Use `python main.py --scrape-only` to refresh Markdown without any store. For Docker: `docker build -t knowledge-sync .`, then `docker run --rm --env-file .env knowledge-sync`. Local mode simulates indexing and does not call OpenAI; only the `openai` backend satisfies the API-upload requirement.
 
-In OpenAI Playground, create a prompt with the **exact** text in [`prompt.txt`](prompt.txt), enable `file_search`, select the vector store created above, and ask **“How do I add a YouTube video?”** The older Assistants API named in the brief was [sunset on August 26, 2026](https://developers.openai.com/api/docs/assistants/migration); Playground prompts plus Responses/file search are its current replacement.
+The **Cobalt Fern OptiBot** prompt was published in OpenAI Playground with the **exact** text in [`prompt.txt`](prompt.txt) and `file_search` attached to the API-created vector store. Asking **“How do I add a YouTube video?”** returned a step-by-step answer with the source article URL. The older Assistants API named in the brief was [sunset on August 26, 2026](https://developers.openai.com/api/docs/assistants/migration); this submission uses the current Playground chat interface with Responses/file search.
 
 ## Delta and chunking
 
@@ -33,4 +33,4 @@ Vector file attributes hold the source ID and SHA-256 of the normalized Markdown
 
 [Daily job runs and logs](https://github.com/ndhuy2711/cobalt-fern-27/actions/workflows/daily.yml) run at 02:00 UTC and can be triggered manually. The workflow builds the Docker image and saves `job.log` as a run artifact. Set repository secrets `OPENAI_API_KEY` and `OPENAI_VECTOR_STORE_ID` before triggering it.
 
-Sample Playground answer and cited URLs: [`evidence/answer.png`](evidence/answer.png) **(capture after API upload and Playground verification)**. Run tests with `.venv/bin/python -m unittest discover -s tests -v`.
+Sample Playground answer and cited URL: [`evidence/answer.png`](evidence/answer.png). Run tests with `.venv/bin/python -m unittest discover -s tests -v`.
