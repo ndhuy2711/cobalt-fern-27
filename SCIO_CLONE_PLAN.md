@@ -1,6 +1,6 @@
 # SCIO clone: MVP delivery plan
 
-**Decision document — trial exploration in progress.** This is a plan for a working digital-signage product, not a pixel-for-pixel copy of every SCIO page. The Screens onboarding observation below comes from our trial account; the remaining workflows will be checked against the trial before submission.
+**Decision document — trial exploration in progress.** This is a plan for a working digital-signage product, not a pixel-for-pixel copy of every SCIO page. The Screens and Files/Assets observations below come from our trial account; playlist and schedule workflows will be checked before submission.
 
 ## 1. Product understanding and the first customer journey
 
@@ -8,9 +8,11 @@ The core job is to let an operator manage what many screens show, when they show
 
 In the trial account's [Screens onboarding view](evidence/product/dashboard.png), the first task is to prepare a device and obtain a six-digit pairing code. The page offers desktop players for people without signage hardware, followed by “Pair Screen & Assign Content,” “Create Content,” and an optional playlist. That is a useful signal that the product's first success moment is a working screen, not a completed content library.
 
+The trial [Files/Assets Home](evidence/product/assets.png) shows nine content cards, including templates, ESPN News, and Houston Weather. Upload Files, Create, New Folder, Apps, Templates, and Feeds are separate entry points; the library also offers Images, Videos, Docs, and Apps filters, Favorites, and Shared with me. The Get Started panel remains visible here, connecting content work back to screen pairing. I would give a new account a few usable starter examples and keep content type and source explicit in the data model. The MVP can ship uploaded images/videos and static starter templates; live app and feed integrations follow later.
+
 This sequence follows the product's own [screen setup guide](https://support.optisigns.com/hc/en-us/articles/360016374813-Set-up-add-a-screen), [playlist guide](https://support.optisigns.com/hc/en-us/articles/28295104605843-How-to-Create-Use-Playlists), and [schedule guide](https://support.optisigns.com/hc/en-us/articles/360016981853-Creating-and-Using-Schedules-with-OptiSigns). In particular, the schedule guide documents screen-local time zones, overlap precedence, and default content when no event is active. Those are playback rules, not merely calendar UI details.
 
-**Trial-account evidence still to add:** screenshots or notes from the Files/Assets, Playlists, and Schedule workflows, including one attempt to publish content to a screen or preview player. This will distinguish observed behavior from help-article descriptions.
+**Trial-account evidence still to add:** screenshots or notes from Playlists and Schedule, including one attempt to publish content to a screen or preview player. This will distinguish observed behavior from help-article descriptions.
 
 ## 2. Scope decision
 
@@ -20,7 +22,7 @@ This sequence follows the product's own [screen setup guide](https://support.opt
 | --- | --- |
 | Account, owner/editor/viewer roles, locations | Operators need a safe boundary for multi-location work. |
 | Pairing code, screen inventory, tags, heartbeat and last-seen time | Without a paired and observable player, content management cannot be verified. |
-| Image/video upload, metadata, folders, replace asset | These are the smallest useful content primitives. Replacing an asset should update screens using it. |
+| Image/video upload, metadata, folders, replace asset, static starter examples | These are the smallest useful content primitives. Starter examples make the first-use library useful; replacing an asset should update screens using it. |
 | Ordered playlists, per-item duration, one simple two-zone layout | Provides both rotation and basic layout control without a full designer. |
 | One-time and weekly content schedules, screen-local time zone, conflict policy, fallback content | Covers normal dayparting and makes empty or overlapping periods deterministic. |
 | Publish/preview, versioned player manifest, local cache and offline continuation | Operators must know what will play; screens must keep playing during temporary disconnection. |
@@ -40,7 +42,7 @@ Management portal ── HTTPS API ── PostgreSQL (tenants, screens, content,
 
 Use a TypeScript web portal and API so the team shares types for assignments and schedules. The player fetches an immutable, versioned manifest containing media URLs, playlist timing, layout, and the schedule resolved for its screen and time zone. It acknowledges the manifest version it is displaying and keeps the last usable version offline. The server records desired version, acknowledged version, heartbeat, and playback errors separately; an “online” indicator alone does not prove the correct content is showing.
 
-Core records: `Organization`, `Membership`, `Location`, `Screen`, `Device`, `Asset`, `Playlist`, `PlaylistItem`, `Layout`, `Schedule`, `ScheduleEvent`, `Assignment`, `PublishedManifest`, `Heartbeat`. Every query is scoped by organization. Pairing codes expire quickly and become revocable player credentials after pairing. Uploads use short-lived signed URLs; media validation occurs before publish.
+Core records: `Organization`, `Membership`, `Location`, `Screen`, `Device`, `ContentItem`, `Asset`, `Playlist`, `PlaylistItem`, `Layout`, `Schedule`, `ScheduleEvent`, `Assignment`, `PublishedManifest`, `Heartbeat`. A playlist item references a typed content item; an uploaded asset or starter template supplies it in the MVP, while a future app connector can use the same reference. Every query is scoped by organization. Pairing codes expire quickly and become revocable player credentials after pairing. Uploads use short-lived signed URLs; media validation occurs before publish.
 
 The schedule resolver uses the **screen's IANA time zone**, records a clear overlap order, and always returns a fallback. The Help Center says a one-time event can override a recurring event and the most recently changed recurring event wins when two recurring events overlap. I would turn those into explicit, tested rules and show conflicts before publication. A publish operation either produces a valid manifest or leaves the last published version in place.
 
