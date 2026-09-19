@@ -1,5 +1,6 @@
 .env
 .venv/
+.local-store/
 __pycache__/
 *.py[cod]
 .DS_Store

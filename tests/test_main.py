@@ -62,6 +62,24 @@ class MainTests(unittest.TestCase):
                 main(["--scrape-only"])
             self.assertEqual(1, len(list((Path(directory) / "articles").glob("*.md"))))
 
+    def test_local_backend_runs_without_api_key(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with ExitStack() as stack:
+                stack.enter_context(patch.dict(os.environ, {
+                    "STORAGE_BACKEND": "local",
+                    "LOCAL_STORE_DIR": str(Path(directory) / "store"),
+                }, clear=True))
+                stack.enter_context(patch("main.ENV_FILE", Path(directory) / ".env"))
+                stack.enter_context(patch("main.ARTICLES_DIR", Path(directory) / "articles"))
+                stack.enter_context(patch("main.MIN_ARTICLES", 1))
+                stack.enter_context(patch("main.ZendeskClient", return_value=Client()))
+                output = stack.enter_context(patch("sys.stdout", new_callable=StringIO))
+
+                main([])
+
+            self.assertIn('"backend": "local"', output.getvalue())
+            self.assertTrue((Path(directory) / "store" / "index.json").exists())
+
     def test_rejects_too_small_a_corpus_before_upload(self):
         with tempfile.TemporaryDirectory() as directory:
             with self.assertRaisesRegex(ValueError, "at least 2"):

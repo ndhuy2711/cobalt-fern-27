@@ -7,15 +7,19 @@ This job reads 36 public OptiSigns Help Center articles from seven Zendesk secti
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-cp .env.sample .env
-# Set OPENAI_API_KEY in .env, then:
-.venv/bin/python main.py --create-store
-# Copy the returned ID into OPENAI_VECTOR_STORE_ID in .env.
-.venv/bin/python main.py
-.venv/bin/python main.py  # unchanged articles should now be skipped
+.venv/bin/python main.py  # .env uses a persistent local test store
+.venv/bin/python main.py  # unchanged articles are skipped
 ```
 
-Use `python main.py --scrape-only` to refresh Markdown without an API key. For Docker: `docker build -t knowledge-sync .`, then `docker run --rm --env-file .env knowledge-sync`.
+For the real vector store, copy `.env.sample` to `.env`, set `OPENAI_API_KEY`, then run:
+
+```bash
+.venv/bin/python main.py --create-store
+# Copy the returned ID into OPENAI_VECTOR_STORE_ID in .env
+.venv/bin/python main.py
+```
+
+Use `python main.py --scrape-only` to refresh Markdown without any store. For Docker: `docker build -t knowledge-sync .`, then `docker run --rm --env-file .env knowledge-sync`. Local mode simulates indexing and does not call OpenAI; only the `openai` backend satisfies the API-upload requirement.
 
 In OpenAI Playground, create a prompt with the **exact** text in [`prompt.txt`](prompt.txt), enable `file_search`, select the vector store created above, and ask **“How do I add a YouTube video?”** The older Assistants API named in the brief was [sunset on August 26, 2026](https://developers.openai.com/api/docs/assistants/migration); Playground prompts plus Responses/file search are its current replacement.
 

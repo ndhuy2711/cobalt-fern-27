@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 
 from optibot.content import article_to_markdown
+from optibot.local_store import LocalStore
 from optibot.store import OpenAIStore
 from optibot.sync import _filename, sync_articles
 from optibot.zendesk import ZendeskClient
@@ -74,17 +75,27 @@ def main(argv=None):
         print(json.dumps({"source_articles": len(articles), "markdown_files": len(articles)}))
         return
 
-    api_key = os.getenv("OPENAI_API_KEY") or os.getenv("API_KEY")
-    if not api_key:
-        raise ValueError("Set OPENAI_API_KEY or API_KEY in .env or the environment")
-    vector_store_id = os.getenv("OPENAI_VECTOR_STORE_ID") or os.getenv("VECTOR_STORE_ID")
-    if not vector_store_id:
-        raise ValueError("Set OPENAI_VECTOR_STORE_ID or VECTOR_STORE_ID")
+    backend = os.getenv("STORAGE_BACKEND", "openai").lower()
+    if backend == "local":
+        store_dir = Path(os.getenv("LOCAL_STORE_DIR", ".local-store"))
+        if not store_dir.is_absolute():
+            store_dir = PROJECT_DIR / store_dir
+        store = LocalStore(store_dir)
+    elif backend == "openai":
+        api_key = os.getenv("OPENAI_API_KEY") or os.getenv("API_KEY")
+        if not api_key:
+            raise ValueError("Set OPENAI_API_KEY or API_KEY in .env or the environment")
+        vector_store_id = os.getenv("OPENAI_VECTOR_STORE_ID") or os.getenv("VECTOR_STORE_ID")
+        if not vector_store_id:
+            raise ValueError("Set OPENAI_VECTOR_STORE_ID or VECTOR_STORE_ID")
+        store = OpenAIStore(api_key, vector_store_id)
+    else:
+        raise ValueError(f"Unknown STORAGE_BACKEND: {backend}")
 
     result = run_once(
-        ZendeskClient(), OpenAIStore(api_key, vector_store_id), ARTICLES_DIR, SECTION_IDS, MIN_ARTICLES
+        ZendeskClient(), store, ARTICLES_DIR, SECTION_IDS, MIN_ARTICLES
     )
-    print(json.dumps(result, sort_keys=True))
+    print(json.dumps({"backend": backend, **result}, sort_keys=True))
 
 
 if __name__ == "__main__":

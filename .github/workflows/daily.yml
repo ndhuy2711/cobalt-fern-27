@@ -17,11 +17,12 @@ jobs:
         run: docker build -t knowledge-sync .
       - name: Scrape and upload changed articles
         env:
+          STORAGE_BACKEND: openai
           API_KEY: ${{ secrets.OPENAI_API_KEY }}
           VECTOR_STORE_ID: ${{ secrets.OPENAI_VECTOR_STORE_ID }}
         run: |
           set -o pipefail
-          docker run --rm -e API_KEY -e VECTOR_STORE_ID knowledge-sync | tee job.log
+          docker run --rm -e STORAGE_BACKEND -e API_KEY -e VECTOR_STORE_ID knowledge-sync | tee job.log
       - name: Save last run log
         if: always()
         uses: actions/upload-artifact@v4
