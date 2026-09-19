@@ -1,6 +1,6 @@
 # SCIO clone: MVP delivery plan
 
-**Decision document — trial exploration in progress.** This is a plan for a working digital-signage product, not a pixel-for-pixel copy of every SCIO page. The Screens, Files/Assets, Playlist, and push-dialog observations below come from our trial account; the Schedule page and actual player playback remain to be checked.
+**Decision document — trial exploration in progress.** This is a plan for a working digital-signage product, not a pixel-for-pixel copy of every SCIO page. The Screens, Files/Assets, Playlist, and push-dialog observations below come from our trial account; the main Schedules page and actual player playback remain to be checked.
 
 ## 1. Product understanding and the first customer journey
 
@@ -12,7 +12,7 @@ The trial [Files/Assets Home](evidence/product/assets.png) shows nine content ca
 
 The trial [Simple Playlist editor](evidence/product/playlists.png) already contains nine mixed content items with item durations from 10 to 60 seconds and a total of 6 minutes 10 seconds. The asset browser is open beside the ordered list, with a drag/browse drop zone and a direct **Push to Screens** action. This makes a starter playlist, duration controls, preview, and a short path to publication part of the first-use flow. I would seed a playlist from the static examples rather than require the operator to assemble one before seeing content on a screen.
 
-The [Push to Screens dialog](evidence/product/push-to-screens.png) requires a target and screen selection, shows a landscape 16:9 playback preview, and offers **Push Now**, **Schedule**, and **Temporarily** modes in one place. With no screen selected, Push is disabled in our trial; this verifies the configuration path, not playback on a device. I would ship Push Now and scheduled assignment in the MVP, then add temporary overrides after the basic conflict rules are proven.
+The [Push to Screens dialog](evidence/product/push-to-screens.png) requires a target and screen selection, shows a landscape 16:9 playback preview, and offers **Push Now**, **Schedule**, and **Temporarily** modes in one place. Its [Schedule tab](evidence/product/push-schedule.png) asks for a Go-Live date/time and optional expiration. That is a timed, one-off assignment, not evidence of a reusable recurring schedule. With no screen selected, Schedule Push is disabled in our trial; this verifies configuration, not playback on a device. I would ship immediate and timed assignments in the MVP, then add temporary overrides after conflict rules are proven. The go-live form should state the target screen's time zone explicitly; none is shown in this view.
 
 This sequence follows the product's own [screen setup guide](https://support.optisigns.com/hc/en-us/articles/360016374813-Set-up-add-a-screen), [playlist guide](https://support.optisigns.com/hc/en-us/articles/28295104605843-How-to-Create-Use-Playlists), and [schedule guide](https://support.optisigns.com/hc/en-us/articles/360016981853-Creating-and-Using-Schedules-with-OptiSigns). In particular, the schedule guide documents screen-local time zones, overlap precedence, and default content when no event is active. Those are playback rules, not merely calendar UI details.
 
@@ -29,7 +29,7 @@ This sequence follows the product's own [screen setup guide](https://support.opt
 | Image/video upload, metadata, folders, replace asset, static starter examples | These are the smallest useful content primitives. Starter examples make the first-use library useful; replacing an asset should update screens using it. |
 | Ordered playlists, per-item duration, starter playlist, preview, one simple two-zone layout | The trial's sample playlist shortens time to first playback; this still avoids a full designer. |
 | One-time and weekly content schedules, screen-local time zone, conflict policy, fallback content | Covers normal dayparting and makes empty or overlapping periods deterministic. |
-| Direct Push to Screens, versioned player manifest, local cache and offline continuation | Operators need a short path from playlist to playback; screens must keep playing during temporary disconnection. |
+| Immediate/timed Push to Screens, versioned player manifest, local cache and offline continuation | Operators need a short path from playlist to playback; screens must keep playing during temporary disconnection. |
 
 **After MVP:** temporary assignment overrides; monthly/custom recurrence; nested playlists; social and third-party app integrations; template designer; billing; SSO; advanced analytics; remote power/volume/brightness; HDMI-CEC and RS-232; native players for multiple OS families. These have materially different implementation or support costs. The [operational schedule guide](https://support.optisigns.com/hc/en-us/articles/28598173096723-How-To-Create-and-Use-Operational-Schedules-HDMI-CEC-RS-232) describes hardware and plan-specific behavior, so it should be a separate workstream rather than a checkbox in the content scheduler.
 
@@ -46,7 +46,7 @@ Management portal ── HTTPS API ── PostgreSQL (tenants, screens, content,
 
 Use a TypeScript web portal and API so the team shares types for assignments and schedules. The player fetches an immutable, versioned manifest containing media URLs, playlist timing, layout, and the schedule resolved for its screen and time zone. It acknowledges the manifest version it is displaying and keeps the last usable version offline. The server records desired version, acknowledged version, heartbeat, and playback errors separately; an “online” indicator alone does not prove the correct content is showing.
 
-Core records: `Organization`, `Membership`, `Location`, `Screen`, `Device`, `ContentItem`, `Asset`, `Playlist`, `PlaylistItem`, `Layout`, `Schedule`, `ScheduleEvent`, `Assignment`, `PublishedManifest`, `Heartbeat`. A playlist item references a typed content item; an uploaded asset or starter template supplies it in the MVP, while a future app connector can use the same reference. Every query is scoped by organization. Pairing codes expire quickly and become revocable player credentials after pairing. Uploads use short-lived signed URLs; media validation occurs before publish.
+Core records: `Organization`, `Membership`, `Location`, `Screen`, `Device`, `ContentItem`, `Asset`, `Playlist`, `PlaylistItem`, `Layout`, `Schedule`, `ScheduleEvent`, `Assignment`, `PublishedManifest`, `Heartbeat`. A playlist item references a typed content item; an uploaded asset or starter template supplies it in the MVP, while a future app connector can use the same reference. An `Assignment` has optional go-live and expiry instants; recurring `ScheduleEvent` rules are stored separately. Every query is scoped by organization. Pairing codes expire quickly and become revocable player credentials after pairing. Uploads use short-lived signed URLs; media validation occurs before publish.
 
 The schedule resolver uses the **screen's IANA time zone**, records a clear overlap order, and always returns a fallback. The Help Center says a one-time event can override a recurring event and the most recently changed recurring event wins when two recurring events overlap. I would turn those into explicit, tested rules and show conflicts before publication. A publish operation either produces a valid manifest or leaves the last published version in place.
 
@@ -59,7 +59,7 @@ Assume **four engineers** (two full-stack, one player-focused, one backend/media
 | 1–2 | Trial research, clickable flow, domain model, player/API contract, test devices | The player contract and scheduling rules are expensive to change later. |
 | 3–4 | Auth, tenant boundary, location and screen records, expiring pairing flow | Establishes the identity of each screen before publishing content. |
 | 5–7 | Asset upload/processing, playlist editing, starter examples, basic layout preview | Gives operators content to assign immediately and exposes codec problems early. |
-| 7–9 | Publish and assignment, manifest versions, online player playback, heartbeat | First end-to-end vertical slice: upload → publish → visible screen. |
+| 7–9 | Immediate/timed assignment, manifest versions, online player playback, heartbeat | First end-to-end vertical slice: starter playlist → publish → visible screen. |
 | 9–11 | Weekly/one-time schedules, time zones, overlap warnings, fallback | Builds on the working player and makes scheduling behavior testable. |
 | 11–13 | Offline cache, retry/reconnect, role checks, bulk screen assignment | Reliability and multi-location operations before broad rollout. |
 | 14–16 | Pilot with representative screens, accessibility, load/soak tests, fixes, release | Real devices and networks reveal issues unit tests cannot. |
