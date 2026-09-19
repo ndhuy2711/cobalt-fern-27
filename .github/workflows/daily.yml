@@ -1,0 +1,31 @@
+name: Daily knowledge sync
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 2 * * *"
+
+permissions:
+  contents: read
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build job image
+        run: docker build -t knowledge-sync .
+      - name: Scrape and upload changed articles
+        env:
+          API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          VECTOR_STORE_ID: ${{ secrets.OPENAI_VECTOR_STORE_ID }}
+        run: |
+          set -o pipefail
+          docker run --rm -e API_KEY -e VECTOR_STORE_ID knowledge-sync | tee job.log
+      - name: Save last run log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-job-log
+          path: job.log
+          if-no-files-found: ignore
