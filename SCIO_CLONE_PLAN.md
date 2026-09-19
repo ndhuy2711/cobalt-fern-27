@@ -1,6 +1,6 @@
 # SCIO clone: MVP delivery plan
 
-**Decision document — trial exploration in progress.** This is a plan for a working digital-signage product, not a pixel-for-pixel copy of every SCIO page. The Screens, Files/Assets, and Playlist observations below come from our trial account; the schedule and publish flows will be checked before submission.
+**Decision document — trial exploration in progress.** This is a plan for a working digital-signage product, not a pixel-for-pixel copy of every SCIO page. The Screens, Files/Assets, Playlist, and push-dialog observations below come from our trial account; the Schedule page and actual player playback remain to be checked.
 
 ## 1. Product understanding and the first customer journey
 
@@ -12,9 +12,11 @@ The trial [Files/Assets Home](evidence/product/assets.png) shows nine content ca
 
 The trial [Simple Playlist editor](evidence/product/playlists.png) already contains nine mixed content items with item durations from 10 to 60 seconds and a total of 6 minutes 10 seconds. The asset browser is open beside the ordered list, with a drag/browse drop zone and a direct **Push to Screens** action. This makes a starter playlist, duration controls, preview, and a short path to publication part of the first-use flow. I would seed a playlist from the static examples rather than require the operator to assemble one before seeing content on a screen.
 
+The [Push to Screens dialog](evidence/product/push-to-screens.png) requires a target and screen selection, shows a landscape 16:9 playback preview, and offers **Push Now**, **Schedule**, and **Temporarily** modes in one place. With no screen selected, Push is disabled in our trial; this verifies the configuration path, not playback on a device. I would ship Push Now and scheduled assignment in the MVP, then add temporary overrides after the basic conflict rules are proven.
+
 This sequence follows the product's own [screen setup guide](https://support.optisigns.com/hc/en-us/articles/360016374813-Set-up-add-a-screen), [playlist guide](https://support.optisigns.com/hc/en-us/articles/28295104605843-How-to-Create-Use-Playlists), and [schedule guide](https://support.optisigns.com/hc/en-us/articles/360016981853-Creating-and-Using-Schedules-with-OptiSigns). In particular, the schedule guide documents screen-local time zones, overlap precedence, and default content when no event is active. Those are playback rules, not merely calendar UI details.
 
-**Trial-account evidence still to add:** screenshots or notes from Schedule and one attempt to use Push to Screens or a preview player. This will distinguish observed behavior from help-article descriptions.
+**Trial-account evidence still to add:** screenshots or notes from the Schedule page and, if possible, a paired preview player. This will distinguish observed behavior from help-article descriptions.
 
 ## 2. Scope decision
 
@@ -29,7 +31,7 @@ This sequence follows the product's own [screen setup guide](https://support.opt
 | One-time and weekly content schedules, screen-local time zone, conflict policy, fallback content | Covers normal dayparting and makes empty or overlapping periods deterministic. |
 | Direct Push to Screens, versioned player manifest, local cache and offline continuation | Operators need a short path from playlist to playback; screens must keep playing during temporary disconnection. |
 
-**After MVP:** monthly/custom recurrence; nested playlists; social and third-party app integrations; template designer; billing; SSO; advanced analytics; remote power/volume/brightness; HDMI-CEC and RS-232; native players for multiple OS families. These have materially different implementation or support costs. The [operational schedule guide](https://support.optisigns.com/hc/en-us/articles/28598173096723-How-To-Create-and-Use-Operational-Schedules-HDMI-CEC-RS-232) describes hardware and plan-specific behavior, so it should be a separate workstream rather than a checkbox in the content scheduler.
+**After MVP:** temporary assignment overrides; monthly/custom recurrence; nested playlists; social and third-party app integrations; template designer; billing; SSO; advanced analytics; remote power/volume/brightness; HDMI-CEC and RS-232; native players for multiple OS families. These have materially different implementation or support costs. The [operational schedule guide](https://support.optisigns.com/hc/en-us/articles/28598173096723-How-To-Create-and-Use-Operational-Schedules-HDMI-CEC-RS-232) describes hardware and plan-specific behavior, so it should be a separate workstream rather than a checkbox in the content scheduler.
 
 ## 3. The system I would build
 
@@ -68,7 +70,8 @@ The estimate is about **50 engineer-weeks**: 6 for account/screen foundations, 9
 
 ## 5. Acceptance measures and risks
 
-- A new operator can pair a test screen and display an uploaded image or video within 10 minutes, without developer help.
+- A new operator can pair a test screen and display the starter playlist within 10 minutes, without developer help.
+- Push Now requires a selected screen, and its preview reflects the screen orientation before the operator confirms publication.
 - Publishing a changed playlist reaches an online player within 60 seconds; the portal shows the version the player acknowledged.
 - A player keeps showing its last published content for 24 hours without network access and recovers without duplicate or stale assignments.
 - At schedule boundaries, playback changes within one minute in the screen's time zone; conflict precedence and fallback have automated tests, including daylight-saving transitions.
