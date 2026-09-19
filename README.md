@@ -7,11 +7,13 @@ This job reads 36 public OptiSigns Help Center articles from seven Zendesk secti
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-.venv/bin/python main.py  # .env uses a persistent local test store
+cp .env.sample .env
+# For an API-free trial, set STORAGE_BACKEND=local in .env
+.venv/bin/python main.py
 .venv/bin/python main.py  # unchanged articles are skipped
 ```
 
-For the real vector store, copy `.env.sample` to `.env`, set `OPENAI_API_KEY`, then run:
+For the real vector store, set `STORAGE_BACKEND=openai` and `OPENAI_API_KEY` in `.env`, then run:
 
 ```bash
 .venv/bin/python main.py --create-store
