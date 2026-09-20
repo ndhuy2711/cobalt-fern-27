@@ -71,6 +71,20 @@ class ContentTests(unittest.TestCase):
 
         self.assertTrue(all(len(chunk.encode("utf-8")) <= max_bytes for chunk in chunks))
 
+    def test_article_conversion_drops_empty_headings(self):
+        article = {
+            "id": 123,
+            "title": "Setup",
+            "html_url": "https://support.optisigns.com/hc/en-us/articles/123",
+            "body": "<h2>Steps</h2><h4> </h4><p>Choose a screen.</p>",
+        }
+
+        markdown = article_to_markdown(article)
+
+        self.assertIn("## Steps", markdown)
+        self.assertIn("Choose a screen.", markdown)
+        self.assertNotIn("####", markdown)
+
 
 if __name__ == "__main__":
     unittest.main()

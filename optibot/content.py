@@ -14,6 +14,9 @@ def article_to_markdown(article):
         if note.startswith(("editor’s note", "editor's note")):
             paragraph.decompose()
     for heading in soup.find_all(re.compile(r"^h[1-6]$")):
+        if not heading.get_text(" ", strip=True):
+            heading.decompose()
+            continue
         strong = heading.find("strong")
         if strong and heading.get_text(" ", strip=True) == strong.get_text(" ", strip=True):
             strong.unwrap()

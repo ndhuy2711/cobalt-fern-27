@@ -15,8 +15,6 @@ You just need to copy the YouTube channel link and paste in the YouTube Live Sch
 
 **![](https://support.optisigns.com/hc/article_attachments/29017347776531)**
 
-##
-
 |  |
 | --- |
 |  |

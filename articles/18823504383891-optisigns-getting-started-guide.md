@@ -24,8 +24,6 @@ Article URL: https://support.optisigns.com/hc/en-us/articles/18823504383891-Opti
 | --- |
 | We recommend watching our short how-to video so you get to know the basics. |
 
-####
-
 #### Pick one of the 3 ways below to get OptiSigns running on your TV:
 
 1. The easiest way to get started is to get your favorite brand of TV and get our[**OptiSigns OptiStick**](https://shop.optisigns.com/products/optisigns-android-stick-player-2) to run OptiSigns on it. Follow [**this guide**](https://support.optisigns.com/hc/en-us/articles/27267311796243) to learn how to set up your OptiSigns Player
