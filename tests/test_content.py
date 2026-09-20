@@ -85,6 +85,19 @@ class ContentTests(unittest.TestCase):
         self.assertIn("Choose a screen.", markdown)
         self.assertNotIn("####", markdown)
 
+    def test_code_block_preserves_html_line_breaks(self):
+        article = {
+            "id": 123,
+            "title": "Streams",
+            "html_url": "https://support.optisigns.com/hc/en-us/articles/123",
+            "body": '<pre><a href="https://one.example">https://one.example</a><br><br>'
+            '<a href="https://two.example">https://two.example</a></pre>',
+        }
+
+        markdown = article_to_markdown(article)
+
+        self.assertIn("https://one.example\n\nhttps://two.example", markdown)
+
 
 if __name__ == "__main__":
     unittest.main()

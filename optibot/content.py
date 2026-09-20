@@ -23,6 +23,8 @@ def article_to_markdown(article):
 
     code_blocks = {}
     for number, pre in enumerate(soup.find_all("pre")):
+        for line_break in pre.find_all("br"):
+            line_break.replace_with("\n")
         code = pre.find("code")
         language = ""
         if code:

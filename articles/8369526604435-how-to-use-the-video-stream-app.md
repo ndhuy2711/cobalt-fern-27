@@ -26,7 +26,9 @@ Enter your Video Stream app information:
 Here are some free public HLS URLs:
 
 ```
-https://bitmovin-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8https://content.jwplatform.com/manifests/yp34SRmf.m3u8
+https://bitmovin-a.akamaihd.net/content/MI201109210084_1/m3u8s/f08e80da-bf1d-4e3d-8899-f0f6155f6efa.m3u8
+
+https://content.jwplatform.com/manifests/yp34SRmf.m3u8
 ```
 
 Click Save to save your asset.
