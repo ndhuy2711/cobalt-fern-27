@@ -32,6 +32,6 @@ Vector file attributes store source ID and SHA-256. Each run compares hashes, in
 
 ## Daily job and evidence
 
-The [daily workflow](https://github.com/ndhuy2711/cobalt-fern-27/actions/workflows/daily.yml) runs at 02:00 UTC. [Verified run and logs](https://github.com/ndhuy2711/cobalt-fern-27/actions/runs/35439638125) show `skipped: 36`; the [log artifact](https://github.com/ndhuy2711/cobalt-fern-27/actions/runs/35439638125/artifacts/10583780009) records counts. GitHub secrets provide the API key and store ID.
+The [daily workflow](https://github.com/ndhuy2711/cobalt-fern-27/actions/workflows/daily.yml) runs at 02:00 UTC. [Verified run and logs](https://github.com/ndhuy2711/cobalt-fern-27/actions/runs/35487157405) show `skipped: 36`; the [log artifact](https://github.com/ndhuy2711/cobalt-fern-27/actions/runs/35487157405/artifacts/10598325793) records counts. GitHub secrets provide the API key and store ID.
 
 Evidence: [trial OptiBot chat](evidence/product/optibot-chat.png), [Playground answer with cited URL](evidence/answer.png). Tests: `.venv/bin/python -m unittest discover -s tests -v`.
