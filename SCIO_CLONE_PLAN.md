@@ -1,6 +1,6 @@
 # SCIO clone: MVP delivery plan
 
-**Decision document — trial exploration in progress.** This is a plan for a working digital-signage product, not a pixel-for-pixel copy of every SCIO page. The Screens, Files/Assets, Playlist, and push-dialog observations below come from our trial account; the main Schedules page and actual player playback remain to be checked.
+**Decision document — trial exploration in progress.** This is a plan for a working digital-signage product, not a pixel-for-pixel copy of every SCIO page. The Screens, Files/Assets, Playlist, Push to Screens, and Schedules Home observations below come from our trial account; the schedule editor and actual player playback remain to be checked.
 
 ## 1. Product understanding and the first customer journey
 
@@ -14,9 +14,11 @@ The trial [Simple Playlist editor](evidence/product/playlists.png) already conta
 
 The [Push to Screens dialog](evidence/product/push-to-screens.png) requires a target and screen selection, shows a landscape 16:9 playback preview, and offers **Push Now**, **Schedule**, and **Temporarily** modes in one place. Its [Schedule tab](evidence/product/push-schedule.png) asks for a Go-Live date/time and optional expiration. That is a timed, one-off assignment, not evidence of a reusable recurring schedule. With no screen selected, Schedule Push is disabled in our trial; this verifies configuration, not playback on a device. I would ship immediate and timed assignments in the MVP, then add temporary overrides after conflict rules are proven. The go-live form should state the target screen's time zone explicitly; none is shown in this view.
 
+The trial [Schedules Home](evidence/product/schedules.png) is empty even though a sample playlist exists. It has a separate **Create Schedule** entry point; recurring scheduling is therefore a distinct operator workflow rather than a required step before the first Push to Screens. This supports sequencing first playback before the schedule editor.
+
 This sequence follows the product's own [screen setup guide](https://support.optisigns.com/hc/en-us/articles/360016374813-Set-up-add-a-screen), [playlist guide](https://support.optisigns.com/hc/en-us/articles/28295104605843-How-to-Create-Use-Playlists), and [schedule guide](https://support.optisigns.com/hc/en-us/articles/360016981853-Creating-and-Using-Schedules-with-OptiSigns). In particular, the schedule guide documents screen-local time zones, overlap precedence, and default content when no event is active. Those are playback rules, not merely calendar UI details.
 
-**Trial-account evidence still to add:** screenshots or notes from the Schedule page and, if possible, a paired preview player. This will distinguish observed behavior from help-article descriptions.
+**Trial-account evidence still to add:** screenshots or notes from the Create Schedule editor and, if possible, a paired preview player. This will distinguish observed behavior from help-article descriptions.
 
 ## 2. Scope decision
 
