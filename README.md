@@ -35,4 +35,4 @@ Vector file attributes hold the source ID and SHA-256 of the normalized Markdown
 
 The [daily workflow](https://github.com/ndhuy2711/cobalt-fern-27/actions/workflows/daily.yml) runs at 02:00 UTC and can be triggered manually. The [verified run and logs](https://github.com/ndhuy2711/cobalt-fern-27/actions/runs/35439638125) completed with `skipped: 36`; its [job.log artifact](https://github.com/ndhuy2711/cobalt-fern-27/actions/runs/35439638125/artifacts/10583780009) records all counts. Repository secrets `OPENAI_API_KEY` and `OPENAI_VECTOR_STORE_ID` supply credentials at runtime.
 
-Sample Playground answer and cited URL: [`evidence/answer.png`](evidence/answer.png). Run tests with `.venv/bin/python -m unittest discover -s tests -v`.
+Warm-up chat with the trial OptiBot: [`evidence/product/optibot-chat.png`](evidence/product/optibot-chat.png). Sample Playground answer and cited URL: [`evidence/answer.png`](evidence/answer.png). Run tests with `.venv/bin/python -m unittest discover -s tests -v`.
