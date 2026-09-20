@@ -1,6 +1,6 @@
 # SCIO clone: MVP delivery plan
 
-**Decision document — trial exploration in progress.** This is a plan for a working digital-signage product, not a pixel-for-pixel copy of every SCIO page. The Screens, Files/Assets, Playlist, Push to Screens, and Schedules Home observations below come from our trial account; the schedule editor and actual player playback remain to be checked.
+**Decision document — based on trial use and the OptiSigns Help Center.** This is a plan for a working digital-signage product, not a pixel-for-pixel copy of every SCIO page. We inspected Screens, Files/Assets, Playlists, Push to Screens, and Schedules in the trial account. We did not pair a player, so actual device playback and sync latency remain assumptions for the week-1 spike.
 
 ## 1. Product understanding and the first customer journey
 
@@ -14,11 +14,11 @@ The trial [Simple Playlist editor](evidence/product/playlists.png) already conta
 
 The [Push to Screens dialog](evidence/product/push-to-screens.png) requires a target and screen selection, shows a landscape 16:9 playback preview, and offers **Push Now**, **Schedule**, and **Temporarily** modes in one place. Its [Schedule tab](evidence/product/push-schedule.png) asks for a Go-Live date/time and optional expiration. That is a timed, one-off assignment, not evidence of a reusable recurring schedule. With no screen selected, Schedule Push is disabled in our trial; this verifies configuration, not playback on a device. I would ship immediate and timed assignments in the MVP, then add temporary overrides after conflict rules are proven. The go-live form should state the target screen's time zone explicitly; none is shown in this view.
 
-The trial [Schedules Home](evidence/product/schedules.png) is empty even though a sample playlist exists. It has a separate **Create Schedule** entry point; recurring scheduling is therefore a distinct operator workflow rather than a required step before the first Push to Screens. This supports sequencing first playback before the schedule editor.
+The trial [Schedules Home](evidence/product/schedules.png) was empty even though a sample playlist existed. After creating a schedule, its [weekly calendar](evidence/product/schedule-editor.png) exposed **Add Event** and **Push to Screens** as separate actions; [saved event blocks](evidence/product/schedule-event.png) appeared on that calendar. The Add Event form let us choose an asset or playlist, start/end times, Repeat, Scale, and a display color. Recurring scheduling is therefore a distinct operator workflow rather than a prerequisite for the first Push to Screens.
 
 This sequence follows the product's own [screen setup guide](https://support.optisigns.com/hc/en-us/articles/360016374813-Set-up-add-a-screen), [playlist guide](https://support.optisigns.com/hc/en-us/articles/28295104605843-How-to-Create-Use-Playlists), and [schedule guide](https://support.optisigns.com/hc/en-us/articles/360016981853-Creating-and-Using-Schedules-with-OptiSigns). In particular, the schedule guide documents screen-local time zones, overlap precedence, and default content when no event is active. Those are playback rules, not merely calendar UI details.
 
-**Trial-account evidence still to add:** screenshots or notes from the Create Schedule editor and, if possible, a paired preview player. This will distinguish observed behavior from help-article descriptions.
+**Observation limit:** no screen was paired in the trial, so preview and calendar configuration were inspected but publish-to-device behavior was not measured. Playback timing, offline behavior, and conflict resolution below are implementation targets to validate with a real player; recurrence and precedence rules are corroborated by the Help Center.
 
 ## 2. Scope decision
 
@@ -30,7 +30,7 @@ This sequence follows the product's own [screen setup guide](https://support.opt
 | Pairing code, screen inventory, tags, heartbeat and last-seen time | Without a paired and observable player, content management cannot be verified. |
 | Image/video upload, metadata, folders, replace asset, static starter examples | These are the smallest useful content primitives. Starter examples make the first-use library useful; replacing an asset should update screens using it. |
 | Ordered playlists, per-item duration, starter playlist, preview, one simple two-zone layout | The trial's sample playlist shortens time to first playback; this still avoids a full designer. |
-| One-time and weekly content schedules, screen-local time zone, conflict policy, fallback content | Covers normal dayparting and makes empty or overlapping periods deterministic. |
+| One-time and weekly content schedules for assets/playlists, screen-local time zone, conflict policy, fallback content | Covers normal dayparting and makes empty or overlapping periods deterministic. |
 | Immediate/timed Push to Screens, versioned player manifest, local cache and offline continuation | Operators need a short path from playlist to playback; screens must keep playing during temporary disconnection. |
 
 **After MVP:** temporary assignment overrides; monthly/custom recurrence; nested playlists; social and third-party app integrations; template designer; billing; SSO; advanced analytics; remote power/volume/brightness; HDMI-CEC and RS-232; native players for multiple OS families. These have materially different implementation or support costs. The [operational schedule guide](https://support.optisigns.com/hc/en-us/articles/28598173096723-How-To-Create-and-Use-Operational-Schedules-HDMI-CEC-RS-232) describes hardware and plan-specific behavior, so it should be a separate workstream rather than a checkbox in the content scheduler.
@@ -48,9 +48,9 @@ Management portal ── HTTPS API ── PostgreSQL (tenants, screens, content,
 
 Use a TypeScript web portal and API so the team shares types for assignments and schedules. The player fetches an immutable, versioned manifest containing media URLs, playlist timing, layout, and the schedule resolved for its screen and time zone. It acknowledges the manifest version it is displaying and keeps the last usable version offline. The server records desired version, acknowledged version, heartbeat, and playback errors separately; an “online” indicator alone does not prove the correct content is showing.
 
-Core records: `Organization`, `Membership`, `Location`, `Screen`, `Device`, `ContentItem`, `Asset`, `Playlist`, `PlaylistItem`, `Layout`, `Schedule`, `ScheduleEvent`, `Assignment`, `PublishedManifest`, `Heartbeat`. A playlist item references a typed content item; an uploaded asset or starter template supplies it in the MVP, while a future app connector can use the same reference. An `Assignment` has optional go-live and expiry instants; recurring `ScheduleEvent` rules are stored separately. Every query is scoped by organization. Pairing codes expire quickly and become revocable player credentials after pairing. Uploads use short-lived signed URLs; media validation occurs before publish.
+Core records: `Organization`, `Membership`, `Location`, `Screen`, `Device`, `ContentItem`, `Asset`, `Playlist`, `PlaylistItem`, `Layout`, `Schedule`, `ScheduleEvent`, `Assignment`, `PublishedManifest`, `Heartbeat`. A playlist item references a typed content item; an uploaded asset or starter template supplies it in the MVP, while a future app connector can use the same reference. An `Assignment` has optional go-live and expiry instants; a `ScheduleEvent` references an asset or playlist and stores start/end times, recurrence, and scale. Every query is scoped by organization. Pairing codes expire quickly and become revocable player credentials after pairing. Uploads use short-lived signed URLs; media validation occurs before publish.
 
-The schedule resolver uses the **screen's IANA time zone**, records a clear overlap order, and always returns a fallback. The Help Center says a one-time event can override a recurring event and the most recently changed recurring event wins when two recurring events overlap. I would turn those into explicit, tested rules and show conflicts before publication. A publish operation either produces a valid manifest or leaves the last published version in place.
+The schedule resolver uses the **screen's IANA time zone**, records a clear overlap order, and returns configured fallback content or a deliberate blank state when nothing is active. The Help Center says a one-time event can override a recurring event and the most recently changed recurring event wins when two recurring events overlap; it also documents daily, weekly, monthly, and custom recurrence. I would implement one-time and weekly rules first, test overlap precedence and daylight-saving boundaries, and show conflicts before publication. A publish operation either produces a valid manifest or leaves the last published version in place.
 
 ## 4. Delivery order and estimate
 
@@ -83,12 +83,8 @@ Main risks: codec differences across hardware, intermittent networks, schedule t
 
 ## 6. Unexpected product finding and plan change
 
-I expected the first-run portal to lead with a media library or layout editor. Instead, the [trial account's first Screens view](evidence/product/dashboard.png) leads with device preparation and a six-digit pairing code, while [Playlists](evidence/product/playlists.png) already has a nine-item Simple Playlist with **Push to Screens**. A customer can reach first playback without creating media. This changed my sequence: the first engineering milestone is a pairable player that can publish a seeded playlist, before a rich uploader or playlist editor. The player spike starts in week 1 and uses sample media; the browser/kiosk player is the first target because the product gives new users a desktop path to try the journey.
+I expected the first-run portal to lead with a media library or layout editor. Instead, the [trial account's first Screens view](evidence/product/dashboard.png) leads with device preparation and a six-digit pairing code, while [Playlists](evidence/product/playlists.png) already has a nine-item Simple Playlist with **Push to Screens**. The UI offers a path to first playback without creating media; the [Schedules page](evidence/product/schedules.png) starts empty. This changed my sequence: the first engineering milestone is a pairable player that can publish a seeded playlist, before a rich uploader or schedule editor. The player spike starts in week 1 and uses sample media; the browser/kiosk player is the first target because the product gives new users a desktop path to try the journey.
 
-## 7. How I would spend the planning exercise's eight hours
+## 7. Decisions to validate before committing the full roadmap
 
-1. **2 hours:** use the trial product as an operator and record the key journeys and unexpected finding.
-2. **1 hour:** cross-check the Help Center and list feature boundaries.
-3. **2 hours:** decide MVP scope, domain model, and architecture tradeoffs.
-4. **2 hours:** estimate milestones, dependencies, staffing, and failure points.
-5. **1 hour:** review the plan against observed UI, remove unsupported claims, and prepare the live discussion.
+The week-1 player spike must measure pairing time, real media decoding, manifest acknowledgement, and recovery after a network cut on the chosen device. It also needs to confirm the exact priority between a timed Push and a recurring schedule, which the trial screenshots do not show. If those tests fail, narrow supported media and device types, then re-estimate the 14–16 week target before building richer editing features.
